@@ -517,8 +517,27 @@ export default {
       const msgConvId = String(
         msg.conversationId?._id || msg.conversationId || "",
       );
-      const convKey = this.determineChatKey(msgConvId);
-      if (convKey) {
+            let convKey = this.determineChatKey(msgConvId);
+
+      //ERRORFIX TEST
+      if (!convKey && msgConvId) {
+        const msgSenderId = msg.senderId?._id;
+        if (msgSenderId) {
+          const friend = this.privateFriendsList.find(
+            (f) => String(f.id) === String(msgSenderId),
+          );
+          if (friend) {
+            this.privateConvIds = {
+              ...this.privateConvIds,
+              [friend.id]: msgConvId,
+            };
+            convKey = "private-" + friend.id;
+          }
+        }
+      }
+
+
+
         const msgTime = new Date(msg.sentAt || Date.now()).getTime();
         if (convKey === "group") {
           this.groupLastMsgAt = Math.max(this.groupLastMsgAt, msgTime);
@@ -526,7 +545,10 @@ export default {
           const friendId = convKey.replace("private-", "");
           this.privateLastMsgAt = { ...this.privateLastMsgAt, [friendId]: Math.max(this.privateLastMsgAt[friendId] || 0, msgTime) };
         }
-
+if (!this.chatOpen) {
+        this.hasUnreadMessages = true;
+      }
+      if (convKey) {
         const isActive = this.conversationId && msgConvId === String(this.conversationId);
         if (!isActive || !this.chatOpen) {
           this.chatUnread = { ...this.chatUnread, [convKey]: true };

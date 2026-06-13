@@ -1,12 +1,5 @@
 <template>
   <div class="phone-frame">
-    <div class="titlebar" @dblclick="toggleMaximize">
-      <div class="buttoncontanier">
-        <button class="defaultbutton" @click="minimizeWindow">_</button>
-        <button class="defaultbutton" @click="closeWindow">x</button>
-      </div>
-    </div>
-
     <div class="phone-content">
       <MainView />
     </div>
@@ -88,31 +81,14 @@ height: 100vh;
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
-  -webkit-overflow-scrolling: touch;
-}
+  -webkit-overflow-scrolling: hidden;
 
-.titlebar {
-  display: flex;
-  height: 2rem;
-  min-height: 2rem;
-  -webkit-app-region: drag;
-  z-index: 9999;
-  justify-content: flex-end;
-  align-items: center;
-  user-select: none;
-  background: rgba(14, 14, 32, 0.95);
-  border-bottom: 1px solid rgba(100, 150, 255, 0.3);
+}
+.phone-content::-webkit-scrollbar {
+  width: 0px;
 }
 
 
-.buttoncontanier {
-  position: relative;
-  border-radius: 0.3rem;
-  display: flex;
-  -webkit-app-region: no-drag;
-  column-gap: 0.5rem;
-  
-}
 
 .defaultbutton {
   font-family: 'Inter', sans-serif;

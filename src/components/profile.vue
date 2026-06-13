@@ -150,7 +150,7 @@ export default {
       required: true,
     },
   },
-  emits: ["profile-updated"],
+  emits: ["profile-updated", "event-chat-left"],
   data() {
     return {
       profile: null,
