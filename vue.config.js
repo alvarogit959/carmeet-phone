@@ -10,8 +10,7 @@ module.exports = defineConfig({
       preload: 'src/preload.js',
       builderOptions: {
         appId: "com.carmeet.club",
-        productName: "CarMeet Club",
-        copyright: "Copyright 2026 Alvaro Del Valle Fernandez",
+        productName: "CarMeet Club Movil",
         directories: {
           output: "dist_electron"
         },
@@ -30,8 +29,16 @@ module.exports = defineConfig({
           }
         ],
         win: {
-          target: ["dir"],
-          icon: "build/car.bmp"
+          target: ["nsis"],
+          icon: "build/car.ico"
+        },
+        nsis: {
+          oneClick: false,
+          allowToChangeInstallationDirectory: true,
+          createDesktopShortcut: true,
+          createStartMenuShortcut: true,
+          installerIcon: "build/car.ico",
+          uninstallerIcon: "build/car.ico"
         },
         asar: true,
         asarUnpack: [

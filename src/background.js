@@ -15,13 +15,12 @@ let win
 
 async function createWindow() {
   win = new BrowserWindow({
-    width: 390,
-  height: 844,
-  minWidth: 390,
-  //maxWidth: 390,
-  minHeight: 844,
- // maxHeight: 844,
-  frame: false,
+    width: 400,
+    height: 850,
+    resizable: false,
+    maxWidth: 600,
+    maxHeight: 1000,
+        frame: false,
             //transparent: true,
             // backgroundColor: '#00000000',
     webPreferences: {
@@ -39,8 +38,6 @@ async function createWindow() {
     createProtocol('app')
 
     win.loadURL('app://./index.html')
-
-    win.webContents.openDevTools()
   }
 }
 ipcMain.on('minimize-window', () => {

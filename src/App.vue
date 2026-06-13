@@ -1,13 +1,16 @@
 <template>
-  <div class="titlebar" @dblclick="toggleMaximize">
-    <div class="buttoncontanier">
-      <button class="defaultbutton" @click="minimizeWindow">_</button>
-      <button class="defaultbutton" @click="toggleMaximize">□</button>
-      <button class="defaultbutton" @click="closeWindow">x</button>
+  <div class="phone-frame">
+    <div class="titlebar" @dblclick="toggleMaximize">
+      <div class="buttoncontanier">
+        <button class="defaultbutton" @click="minimizeWindow">_</button>
+        <button class="defaultbutton" @click="closeWindow">x</button>
+      </div>
+    </div>
+
+    <div class="phone-content">
+      <MainView />
     </div>
   </div>
-
-  <MainView />
 </template>
 
 <script>
@@ -54,6 +57,7 @@ body {
 overflow: hidden;
 height: 100vh;
   width: 100vw;
+  
   padding: 0;
   margin: 0;
   background: transparent;
@@ -62,35 +66,37 @@ height: 100vh;
 }
 
 #app {
-  padding-top: 2rem;
-  margin-top: 0;
   width: 100vw;
-  height: calc(100vh);
+  height: 100vh;
   display: flex;
   flex-direction: column;
-  align-items: center;
   font-family: 'Inter', sans-serif;
-  justify-content: flex-start;
   text-align: center;
-
-
   background: linear-gradient(135deg, rgba(10, 10, 20, 1), rgba(20, 20, 40, 1));
-  border-radius: 0;
   -webkit-app-region: no-drag;
-  padding-top: 0rem;
-  padding-bottom: 0rem;
+}
+
+.phone-frame {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(135deg, rgba(10, 10, 20, 1), rgba(20, 20, 40, 1));
+}
+
+.phone-content {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
 }
 
 .titlebar {
-  display: none;
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
+  display: flex;
   height: 2rem;
+  min-height: 2rem;
   -webkit-app-region: drag;
   z-index: 9999;
-
   justify-content: flex-end;
   align-items: center;
   user-select: none;
