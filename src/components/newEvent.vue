@@ -510,4 +510,7 @@ export default {
   
 }
   }
+  .new-event-container::-webkit-scrollbar {
+  width:0px;
+}
 </style>

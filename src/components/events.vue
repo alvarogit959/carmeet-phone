@@ -1758,6 +1758,7 @@ copyEventInfo() {
   flex: 1;
   overflow-y: auto;
   padding: 1rem 1.25rem 1.5rem;
+      overflow-x: hidden;
 }
 
 .details-scroll::-webkit-scrollbar {
