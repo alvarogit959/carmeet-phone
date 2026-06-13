@@ -231,9 +231,10 @@
                     <button
                       type="button"
                       class="btn-primary chat-event-btn"
+                      :class="{ 'copied': buttonClicked }"
                       @click="copyEventInfo"
                     >
-                      Copiar información
+                      {{ buttonClicked ? 'Copiado!' : 'Copiar información' }}
                     </button>
                   </div>
  <!--POPUP -->
@@ -477,6 +478,7 @@ export default {
       shareChats: [],
       shareLoading: false,
       sendingTo: null,
+      buttonClicked: false,
     };
   },
   computed: {
@@ -1213,7 +1215,7 @@ copyEventInfo() {
   }
   
   eventText += `Descarga CarMeet Club para estar al tanto de las ultimas novedades! \n`;
-  
+  this.buttonClicked = true;
 //test copy
   navigator.clipboard.writeText(eventText).then(() => {
     this.notification = 'Copiado!';
@@ -1372,7 +1374,9 @@ copyEventInfo() {
   background: rgba(255, 255, 255, 0.22);
   transform: translateY(-2px);
 }
-
+.btn-primary.chat-event-btn.copied {
+  background: linear-gradient(135deg,  #087717 50%, #15b939 100%);
+}
 .btn-primary:disabled {
   opacity: 0.5;
   cursor: not-allowed;
