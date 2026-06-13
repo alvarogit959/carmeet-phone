@@ -463,7 +463,7 @@ export default {
         );
         this.joinedEvents = data.joinedEvents || [];
 
-        // Quitar al usuario del chat del evento
+//remove user frome vent
         const eventMongoId = event._id || eventId;
         try {
           await apiJson(`/events/${eventMongoId}/conversation/leave`, {

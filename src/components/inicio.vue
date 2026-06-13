@@ -274,15 +274,12 @@ body {
   max-height: calc(100vh - 2rem - 60px);
   overflow-y: auto;
   overflow-x: hidden;
-  background: linear-gradient(
+    background: linear-gradient(
     135deg,
-    rgba(255, 255, 255, 0.12),
-    rgba(0, 0, 0, 0.726)
+    rgba(11, 6, 61, 0.5),
+    rgba(0, 0, 0, 0.5)
   );
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
 
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
   align-items: center;
   justify-content: flex-start;
   color: rgb(255, 255, 255);

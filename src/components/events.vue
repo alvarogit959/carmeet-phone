@@ -910,7 +910,7 @@ export default {
 
         await this.loadAttendeesForSelected();
 
-        // Unir al usuario al chat del evento
+        //push user into group
         const eventMongoId = this.selectedEvent?._id || eventId;
         try {
           await apiJson(`/events/${eventMongoId}/conversation/join`, {
@@ -1003,7 +1003,7 @@ export default {
           }
         }
 
-        // Quitar al usuario del chat del evento
+        //remove user fromeventt
         const eventMongoId = event._id || eventId;
         try {
           await apiJson(`/events/${eventMongoId}/conversation/leave`, {

@@ -3,16 +3,18 @@
     <!--BARRA SUPERIOR -->
     <nav class="navbar">
       <div class="navbar-content">
+         <div class="menu-icon" @click="toggleMenu"></div>
         <div class="navbar-logo">
           <h2>CarMeet Club</h2>
         </div>
 
-        <ul class="nav-menu">
+        <div v-if="menuOpen" class="menu-overlay" @click="closeMenu"></div>
+        <ul class="nav-menu" :class="{ 'menu-open': menuOpen }">
           <li>
             <button
               class="nav-btn"
               :class="{ active: currentView === 'inicio' }"
-              @click="switchView('inicio')"
+              @click="switchView('inicio'); closeMenu()"
             >
               Inicio
             </button>
@@ -21,7 +23,7 @@
             <button
               class="nav-btn"
               :class="{ active: currentView === 'map' }"
-              @click="switchView('map')"
+              @click="switchView('map'); closeMenu()"
             >
               Mapa
             </button>
@@ -30,9 +32,18 @@
             <button
               class="nav-btn"
               :class="{ active: currentView === 'events' }"
-              @click="switchView('events')"
+              @click="switchView('events'); closeMenu()"
             >
               Eventos
+            </button>
+          </li>
+          <li>
+            <button
+              class="nav-btn"
+              :class="{ active: currentView === 'forum' }"
+              @click="switchView('forum'); closeMenu()"
+            >
+              Foro
             </button>
           </li>
           <!--<li>
@@ -44,59 +55,66 @@
               Rutas
             </button>
           </li>-->
-          <li>
-            <div class="profile-group">
-              <button class="profile-btn" @click="toggleProfileMenu">
-                {{ isLoggedIn ? "Perfil   ▼" : "Iniciar sesión" }}
-              </button>
-              <div v-if="showProfileMenu" class="submenu">
-                <template v-if="isLoggedIn">
-                  <button
-                    class="submenu-btn"
-                    :class="{ active: currentView === 'profile' }"
-                    @click="selectOption('profile')"
-                  >
-                    Mi Perfil
-                  </button>
-                  <button
-                    @click="selectOption('myevents')"
-                    class="submenu-btn"
-                    :class="{ active: currentView === 'myevents' }"
-                  >
-                    Mis Eventos
-                  </button>
-                  <button
-                    @click="selectOption('friends')"
-                    class="submenu-btn"
-                    :class="{ active: currentView === 'friends' }"
-                  >
-                    Amigos
-                  </button>
-                  <button
-                    v-if="isAdmin"
-                    @click="selectOption('admin')"
-                    class="submenu-btn admin-menu-item"
-                    :class="{ active: currentView === 'admin' }"
-                  >
-                    Panel Admin
-                  </button>
-                  <button
-                    @click="selectOption('logout')"
-                    class="submenu-btn logout-option"
-                  >
-                    Cerrar sesión
-                  </button>
-                </template>
-                <template v-else>
-                  <button @click="selectOption('login')" class="submenu-btn">
-                    Iniciar sesión
-                  </button>
-                  <button @click="selectOption('register')" class="submenu-btn">
-                    Registrarse
-                  </button>
-                </template>
-              </div>
-            </div>
+          <li v-if="isLoggedIn">
+            <button
+              class="nav-btn"
+              :class="{ active: currentView === 'profile' }"
+              @click="selectOption('profile'); closeMenu()"
+            >
+              Mi Perfil
+            </button>
+          </li>
+          <li v-if="isLoggedIn">
+            <button
+              class="nav-btn"
+              :class="{ active: currentView === 'myevents' }"
+              @click="selectOption('myevents'); closeMenu()"
+            >
+              Mis Eventos
+            </button>
+          </li>
+          <li v-if="isLoggedIn">
+            <button
+              class="nav-btn"
+              :class="{ active: currentView === 'friends' }"
+              @click="selectOption('friends'); closeMenu()"
+            >
+              Amigos
+            </button>
+          </li>
+          <li v-if="isLoggedIn && isAdmin">
+            <button
+              class="nav-btn"
+              :class="{ active: currentView === 'admin' }"
+              @click="selectOption('admin'); closeMenu()"
+            >
+              Panel Admin
+            </button>
+          </li>
+          <li v-if="isLoggedIn">
+            <button
+              class="nav-btn logout-option"
+              @click="selectOption('logout'); closeMenu()"
+            >
+              Cerrar sesión
+            </button>
+          </li>
+          <li v-if="!isLoggedIn">
+            <button
+              class="nav-btn"
+              :class="{ active: currentView === 'profile' }"
+              @click="selectOption('login'); closeMenu()"
+            >
+              Iniciar sesión
+            </button>
+          </li>
+          <li v-if="!isLoggedIn">
+            <button
+              class="nav-btn"
+              @click="selectOption('register'); closeMenu()"
+            >
+              Registrarse
+            </button>
           </li>
         </ul>
       </div>
@@ -204,6 +222,13 @@
         />
       </div>
 
+      <div v-if="currentView === 'forum'" class="view-container">
+        <ForumView
+          :current-user="currentUser"
+          @view-user="openUserProfile"
+        />
+      </div>
+
       <div v-if="currentView === 'friends'" class="view-container">
         <FriendsView
           v-if="isLoggedIn && currentUser"
@@ -227,15 +252,15 @@
       :class="{ active: chatOpen }"
       title="Abrir chat"
     >
-      <span v-if="!chatOpen">Chat</span>
+      <div v-if="!chatOpen" class="chat-icon"></div>
       <span v-else>✕</span>
       <span
         v-if="hasUnreadMessages && !chatOpen"
-        class="notification-badge"
+        class="notification-redcircle"
       ></span>
     </button>
 
-    <div v-if="isLoggedIn && chatOpen" class="chat-panel">
+      <div v-if="isLoggedIn && chatOpen" class="chat-panel">
       <aside class="chat-sidebar">
         <div class="sidebar-header">
           <span>Chats</span>
@@ -244,48 +269,22 @@
           </button>
         </div>
         <ul class="chat-list">
-          <li>
+          <li v-for="conv in sortedChats" :key="conv.key">
             <button
               type="button"
               class="chat-list-item"
-              :class="{ active: isGroupActive }"
-              @click="selectGroupChat"
+              :class="{ active: conv.isActive }"
+              @click="conv.onSelect()"
             >
-              <span class="chat-avatar group-avatar">G</span>
+              <span class="chat-avatar" :class="conv.avatarClass">{{ conv.avatar }}</span>
               <span class="chat-list-info">
-                <span class="chat-list-name">Chat grupal</span>
-                <span class="chat-list-preview">Todos los usuarios</span>
+                <span class="chat-list-name">{{ conv.name }}</span>
+                <span class="chat-list-preview">{{ conv.typeLabel }}</span>
               </span>
-            </button>
-          </li>
-          <li v-for="friend in privateFriendsList" :key="friend.id">
-            <button
-              type="button"
-              class="chat-list-item"
-              :class="{ active: privateChatFriend?.id === friend.id }"
-              @click="startPrivateChatWith(friend)"
-            >
-              <span class="chat-avatar">{{
-                friend.username.charAt(0).toUpperCase()
-              }}</span>
-              <span class="chat-list-info">
-                <span class="chat-list-name">{{ friend.username }}</span>
-                <span class="chat-list-preview">Privado</span>
-              </span>
-            </button>
-          </li>
-          <li v-for="eventConv in eventConversations" :key="eventConv.conversationId">
-            <button
-              type="button"
-              class="chat-list-item"
-              :class="{ active: eventChatActive?.conversationId === eventConv.conversationId }"
-              @click="selectEventChat(eventConv)"
-            >
-              <span class="chat-avatar event-chat-avatar">E</span>
-              <span class="chat-list-info">
-                <span class="chat-list-name">{{ eventConv.title }}</span>
-                <span class="chat-list-preview">Chat del evento</span>
-              </span>
+              <span
+                v-if="conv.hasUnread"
+                class="chat-notification-dot"
+              ></span>
             </button>
           </li>
         </ul>
@@ -302,7 +301,7 @@
 
         <template v-else>
           <div class="chat-messages" ref="chatMessages">
-            <div
+          <div
               v-for="msg in messages"
               :key="msg.id"
               class="message"
@@ -326,6 +325,7 @@
                 >
                   {{ msg.senderName }}
                 </button>
+
 <!--SHOW DA THINGI-->
                 <div v-if="msg.isEventShare" class="shared-event-card" @click="openSharedEvent(msg.eventData)">
                   <div class="shared-event-image-container">
@@ -333,12 +333,12 @@
                   </div>
                   <div class="shared-event-details">
                     <h5>{{ msg.eventData.title }}</h5>
-                    <p class="shared-event-distance">Ver evento</p>
-   
+                    <p class="shared-event-date">{{ msg.eventData.date }}</p>
+                    <p v-if="msg.eventData.distance" class="shared-event-distance">{{ msg.eventData.distance }}</p>
+                    <p v-if="msg.eventData.location" class="shared-event-location">{{ msg.eventData.location }}</p>
                   </div>
                 </div>
                 <p v-else>{{ msg.text }}</p>
-
                 <span class="message-time">{{
                   new Date(msg.sentAt).toLocaleTimeString()
                 }}</span>
@@ -374,6 +374,7 @@ import newUser from "./newUser.vue";
 import UserView from "./user.vue";
 import AdminPanelView from "./adminPanel.vue";
 import FriendsView from "./friends.vue";
+import ForumView from "./forum.vue";
 import { apiJson, isAdminRole } from "../utils/api.js";
 import { io } from "socket.io-client";
 const socket = io("http://localhost:5000");
@@ -392,6 +393,7 @@ export default {
     UserView,
     AdminPanelView,
     FriendsView,
+    ForumView,
   },
   emits: ["view-user"],
   computed: {
@@ -410,6 +412,59 @@ export default {
       if (this.privateChatFriend) return this.privateChatFriend.username;
       return "Mensajes";
     },
+    sortedChats() {
+      const chats = [];
+//group
+      if (this.groupConversationId) {
+        chats.push({
+          key: "group",
+          conversationId: this.groupConversationId,
+          name: "Chat grupal",
+          avatar: "G",
+          avatarClass: "group-avatar",
+          typeLabel: "Todos los usuarios",
+          isActive: this.isGroupActive,
+          lastMessageAt: this.groupLastMsgAt,
+          hasUnread: this.chatUnread["group"] === true,
+          onSelect: () => this.selectGroupChat(),
+        });
+      }
+
+      //private
+      for (const friend of this.privateFriendsList) {
+        const convId = this.privateConvIds[friend.id];
+        chats.push({
+          key: "private-" + friend.id,
+          conversationId: convId,
+          name: friend.username,
+          avatar: friend.username.charAt(0).toUpperCase(),
+          avatarClass: "",
+          typeLabel: "Privado",
+          isActive: this.privateChatFriend?.id === friend.id,
+          lastMessageAt: this.privateLastMsgAt[friend.id] || 0,
+          hasUnread: this.chatUnread["private-" + friend.id] === true,
+          onSelect: () => this.startPrivateChatWith(friend),
+        });
+      }
+
+      //enventto
+      for (const ev of this.eventConversations) {
+        chats.push({
+          key: "event-" + ev.conversationId,
+          conversationId: ev.conversationId,
+          name: ev.title || "Chat del evento",
+          avatar: "E",
+          avatarClass: "event-chat-avatar",
+          typeLabel: "Chat del evento",
+          isActive: this.eventChatActive?.conversationId === ev.conversationId,
+          lastMessageAt: ev.lastMessage?.sentAt ? new Date(ev.lastMessage.sentAt).getTime() : 0,
+          hasUnread: this.chatUnread["event-" + ev.conversationId] === true,
+          onSelect: () => this.selectEventChat(ev),
+        });
+      }
+      chats.sort((a, b) => (b.lastMessageAt || 0) - (a.lastMessageAt || 0));
+      return chats;
+    },
   },
   data() {
     return {
@@ -427,10 +482,16 @@ export default {
       eventConversations: [],
       eventChatActive: null,
       showProfileMenu: false,
+      menuOpen: false,
       eventFromMap: null,
       viewUserId: null,
       returnViewAfterUser: "inicio",
       hasUnreadMessages: false,
+      chatUnread: {},
+      chatSeen: {},
+      groupLastMsgAt: 0,
+      privateConvIds: {},
+      privateLastMsgAt: {},
     };
   },
   watch: {
@@ -456,20 +517,29 @@ export default {
       const msgConvId = String(
         msg.conversationId?._id || msg.conversationId || "",
       );
+      const convKey = this.determineChatKey(msgConvId);
+      if (convKey) {
+        const msgTime = new Date(msg.sentAt || Date.now()).getTime();
+        if (convKey === "group") {
+          this.groupLastMsgAt = Math.max(this.groupLastMsgAt, msgTime);
+        } else if (convKey.startsWith("private-")) {
+          const friendId = convKey.replace("private-", "");
+          this.privateLastMsgAt = { ...this.privateLastMsgAt, [friendId]: Math.max(this.privateLastMsgAt[friendId] || 0, msgTime) };
+        }
+
+        const isActive = this.conversationId && msgConvId === String(this.conversationId);
+        if (!isActive || !this.chatOpen) {
+          this.chatUnread = { ...this.chatUnread, [convKey]: true };
+          this.hasUnreadMessages = true;
+        }
+      }
+
       if (this.conversationId && msgConvId !== String(this.conversationId)) {
         return;
       }
 
       const exists = this.messages.some((m) => m.id === msg._id);
       if (exists) return;
-      //NOTIFICACIÓN
-      if (
-        !this.chatOpen ||
-        !this.conversationId ||
-        msgConvId !== String(this.conversationId)
-      ) {
-        this.hasUnreadMessages = true;
-      }
 
       this.messages.push(this.processMessage(msg));
     });
@@ -489,7 +559,6 @@ export default {
     onEventChatJoined({ eventId, openChat }) {
       this.loadEventConversations();
       if (openChat) {
-        // Find and select the event chat
         setTimeout(() => {
           const found = this.eventConversations.find(
             (ec) => String(ec.eventId) === String(eventId)
@@ -498,7 +567,7 @@ export default {
             this.chatOpen = true;
             this.selectEventChat(found);
           } else {
-            // Refresh and try again
+//update againn
             this.loadEventConversations().then(() => {
               const retry = this.eventConversations.find(
                 (ec) => String(ec.eventId) === String(eventId)
@@ -513,7 +582,7 @@ export default {
       }
     },
     onEventChatLeft({ eventId }) {
-      // Remove the event chat from list if currently active
+      //remove event from list
       if (this.eventChatActive && String(this.eventChatActive.eventId) === String(eventId)) {
         this.eventChatActive = null;
         this.conversationId = null;
@@ -579,6 +648,7 @@ export default {
       };
       this.currentView = "events";
     },
+
     openEventFromMap(event) {
       this.eventFromMap = event;
       this.currentView = "events";
@@ -683,6 +753,20 @@ export default {
       }
     },
 
+    determineChatKey(convId) {
+      if (!convId) return null;
+      const strId = String(convId);
+      if (this.groupConversationId && strId === String(this.groupConversationId)) return "group";
+      for (const ev of this.eventConversations) {
+        if (strId === String(ev.conversationId)) return "event-" + ev.conversationId;
+      }
+      for (const friend of this.privateFriendsList) {
+        const fId = this.privateConvIds[friend.id];
+        if (fId && strId === String(fId)) return "private-" + friend.id;
+      }
+      return null;
+    },
+
     selectGroupChat() {
       this.chatMode = "group";
       this.privateChatFriend = null;
@@ -701,6 +785,7 @@ export default {
       }
       if (this.groupConversationId) {
         this.conversationId = this.groupConversationId;
+        this.chatUnread = { ...this.chatUnread, group: false };
         this.loadMessages();
       } else {
         this.loadGroupConversation();
@@ -734,6 +819,7 @@ export default {
       }
 
       this.conversationId = eventConv.conversationId;
+      this.chatUnread = { ...this.chatUnread, ["event-" + eventConv.conversationId]: false };
       socket.emit("join-event-chat", { conversationId: eventConv.conversationId });
       this.loadMessages();
     },
@@ -763,6 +849,7 @@ export default {
           );
           convId = data.conversationId;
         }
+        this.privateConvIds = { ...this.privateConvIds, [otherUser.id]: convId };
 
         if (this.conversationId && this.conversationId !== convId) {
           socket.emit("leave-private-chat", {
@@ -772,6 +859,7 @@ export default {
 
         this.conversationId = convId;
         this.privateChatFriend = otherUser;
+        this.chatUnread = { ...this.chatUnread, ["private-" + otherUser.id]: false };
         socket.emit("join-private-chat", { conversationId: convId });
         this.loadMessages();
       } catch (error) {
@@ -780,6 +868,12 @@ export default {
     },
     toggleProfileMenu() {
       this.showProfileMenu = !this.showProfileMenu;
+    },
+    toggleMenu() {
+      this.menuOpen = !this.menuOpen;
+    },
+    closeMenu() {
+      this.menuOpen = false;
     },
     selectOption(option) {
       this.showProfileMenu = false;
@@ -1063,6 +1157,17 @@ background-image: url("http://localhost:5000/event-images/rrreflection.svg");
   color: rgba(255, 255, 255, 0.9);
 }
 
+.nav-btn.logout-option {
+  color: rgba(255, 150, 150, 0.9);
+  border-color: rgba(253, 50, 50, 0.4);
+}
+
+.nav-btn.logout-option:hover {
+  background: rgba(168, 85, 247, 0.15);
+  color: rgba(255, 150, 150, 1);
+  border-color: rgba(255, 100, 100, 0.6);
+}
+
 .profile-group {
   position: relative;
   display: flex;
@@ -1251,12 +1356,75 @@ background-image: url("http://localhost:5000/event-images/rrreflection.svg");
   }
 
   .nav-menu {
-    gap: 0.2rem;
+    position: fixed;
+    top: 0;
+    left: -100%;
+    width: 75%;
+    max-width: 300px;
+    height: 100vh;
+    flex-direction: column;
+    background: rgba(10, 10, 25, 0.98);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-right: 1px solid rgba(99, 102, 241, 0.3);
+    border-bottom: 1px solid rgba(99, 102, 241, 0.3);
+    padding: 2rem 1rem 1rem;
+    gap: 0.5rem;
+    justify-content: flex-start;
+    align-items: stretch;
+    z-index: 9999;
+    transition: left 0.3s ease;
+    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.5);
+  }
+
+  .nav-menu.menu-open {
+    left: 0;
+    height: auto;
+  }
+
+  .menu-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 9998;
+  }
+
+  .nav-menu li {
+    width: 100%;
+  }
+
+  .nav-menu li:last-child {
+    margin-left: 0;
   }
 
   .nav-btn {
-    padding: 0.4rem 0.6rem;
-    font-size: 0.75rem;
+    width: 100%;
+    padding: 0.8rem 1rem;
+    font-size: 0.9rem;
+    text-align: center;
+  }
+
+  .profile-group {
+    width: 100%;
+  }
+
+  .profile-btn {
+    width: 100%;
+    padding: 0.8rem 1rem;
+    font-size: 0.9rem;
+    text-align: center;
+  }
+
+  .submenu {
+    position: static;
+    margin-top: 0.2rem;
+    box-shadow: none;
+    border: 1px solid rgba(100, 200, 255, 0.2);
+    border-radius: 0.3rem;
+    animation: none;
   }
 
   .user-name {
@@ -1268,19 +1436,17 @@ background-image: url("http://localhost:5000/event-images/rrreflection.svg");
     font-size: 0.8rem;
   }
   .view-container {
-
-  height: calc(100vh);
-
-}
+    height: calc(100vh);
+  }
 }
 
 .chat-button {
   position: fixed;
-  bottom: 45px;
+  bottom: 40px;
   right: 20px;
-  width: 100px;
-  height: 50px;
-  border-radius: 0.5rem;
+  width: 4rem;
+  height: 4rem;
+  border-radius: 2rem;
   background: rgba(26, 6, 61, 0.774);
   border: 1px solid rgb(120, 85, 201);
   color: rgb(231, 231, 231);
@@ -1294,9 +1460,10 @@ background-image: url("http://localhost:5000/event-images/rrreflection.svg");
   z-index: 100;
   -webkit-app-region: no-drag;
 }
-.notification-badge {
-  margin-left: 0.5rem;
-  margin-bottom: 0.8rem;
+.notification-redcircle {
+  position:absolute;
+  margin-left: 3rem;
+  margin-bottom: 3rem;
   width: 15px;
   height: 15px;
   background: red;
@@ -1431,6 +1598,15 @@ background-image: url("http://localhost:5000/event-images/rrreflection.svg");
     rgba(168, 85, 247, 0.85)
   );
   color: rgba(255, 255, 255, 0.95);
+}
+
+.chat-notification-dot {
+  flex-shrink: 0;
+  width: 10px;
+  height: 10px;
+  background: #ff3b30;
+  border-radius: 50%;
+  box-shadow: 0 0 6px rgba(255, 59, 48, 0.6);
 }
 
 .event-chat-avatar {
@@ -1665,6 +1841,39 @@ background-image: url("http://localhost:5000/event-images/rrreflection.svg");
 .chat-conversation {
   min-height: 0;
 }
+
+.chat-icon{background-image: url("http://localhost:5000/event-images/chaticon.png");
+  position: relative;
+  background-size: 100%;
+  width:2.5rem;
+  height: 2.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  overflow: hidden;
+  background-size: cover;
+  background-position: center;
+}
+.menu-icon{background-image: url("http://localhost:5000/event-images/menuicon.png");
+  position: relative;
+  background-size: 100%;
+  width:1.5rem;
+  height: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  overflow: hidden;
+  background-size: cover;
+  background-position: center;
+  margin-right: 1rem;
+  -webkit-app-region: no-drag;
+  cursor: pointer;
+}
+
 .shared-event-card {
   display: flex;
   flex-direction: column;
